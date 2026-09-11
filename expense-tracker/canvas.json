@@ -1,0 +1,7 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "Expense Tracker", "expand": "fill", "is_interactive": true },
+    { "file": "CategoryIcon.dc.html", "x": 470, "y": 0, "w": 160, "h": 160, "title": "Category Icon", "is_interactive": true }
+  ],
+  "launch": { "view": "focused", "file": "Main.dc.html" }
+}

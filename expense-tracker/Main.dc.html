@@ -1,0 +1,938 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .et-root { -webkit-tap-highlight-color: transparent; }
+    .et-scroll::-webkit-scrollbar { display: none; }
+    .et-scroll { scrollbar-width: none; }
+    .et-input {
+      width: 100%; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px;
+      padding: 12px 14px; font-size: 16px; font-family: inherit; color: #ffffff;
+      background: #1c2220; outline: none;
+    }
+    .et-input:focus { border-color: #2fe6ac; }
+    .et-input::placeholder { color: #7d8580; }
+    .et-btn-primary {
+      background: #2fe6ac; color: #06140f; border: none; border-radius: 14px;
+      padding: 15px; font-size: 16px; font-weight: 700; font-family: inherit;
+      width: 100%; cursor: pointer;
+    }
+    .et-btn-primary:disabled { background: #262b28; color: #686f6b; cursor: default; }
+    .et-btn-ghost {
+      background: rgba(255,255,255,0.07); color: #ffffff; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px;
+      padding: 10px 14px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;
+    }
+    .et-navbtn { background: none; border: none; font-family: inherit; cursor: pointer; padding: 8px 0; }
+    .et-row:active { background: rgba(255,255,255,0.05); }
+    .et-toast { animation: et-toast-in .2s ease-out; }
+    @keyframes et-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    a { color: #2fe6ac; }
+    a:hover { color: #7ff2d9; }
+  </style>
+</helmet>
+
+<div class="et-root" style="width:100%;max-width:480px;margin:0 auto;height:100vh;min-height:100vh;background:#0b0f0d;display:flex;flex-direction:column;position:relative;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#ffffff;overflow:hidden;">
+
+  <!-- ============ HOME ============ -->
+  <sc-if value="{{isHome}}" hint-placeholder-val="{{true}}">
+  <div class="et-scroll" style="flex:1;overflow-y:auto;padding:22px 20px 16px;">
+
+    <div style="background:linear-gradient(135deg, rgba(47,230,172,0.18), rgba(22,26,24,0) 60%),#161a18;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:20px;margin-bottom:22px;">
+      <div style="font-size:13px;color:#898781;font-weight:600;letter-spacing:0.02em;text-transform:uppercase;">{{monthLabelNow}}</div>
+      <div style="font-size:38px;font-weight:700;letter-spacing:-0.01em;margin-top:4px;color:#ffffff;">{{homeTotalLabel}}</div>
+
+      <sc-if value="{{hasOverallBudget}}" hint-placeholder-val="{{false}}">
+        <div style="margin-top:12px;">
+          <div style="height:8px;border-radius:5px;background:rgba(255,255,255,0.12);overflow:hidden;">
+            <div style="height:100%;border-radius:5px;width:{{overallPct}}%;background:{{overallBarColor}};"></div>
+          </div>
+          <div style="font-size:12.5px;color:#c3c2b7;margin-top:6px;">of {{overallBudgetLabel}} monthly budget</div>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{hasDue}}" hint-placeholder-val="{{false}}">
+      <div style="margin-bottom:6px;">
+        <div style="font-size:13px;font-weight:700;color:#ffffff;margin-bottom:10px;">Due this month</div>
+        <sc-for list="{{dueTemplates}}" as="due" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:12px;background:#161a18;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px 14px;margin-bottom:8px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <dc-import name="CategoryIcon" category-id="{{due.categoryId}}" color="{{due.color}}" size="20" hint-size="20,20"></dc-import>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{due.name}}</div>
+              <div style="font-size:12.5px;color:#898781;">{{due.amountLabel}}</div>
+            </div>
+            <button onClick="{{due.confirm}}" style="flex-shrink:0;background:#2fe6ac;color:#06140f;border:none;border-radius:10px;padding:9px 14px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">Confirm</button>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:20px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:#ffffff;">Recent activity</div>
+      <a href="javascript:void(0)" onClick="{{goHistoryFromHome}}" style="font-size:13px;font-weight:600;text-decoration:none;">See all</a>
+    </div>
+
+    <sc-if value="{{hasRecent}}" hint-placeholder-val="{{false}}">
+      <sc-for list="{{recentList}}" as="tx" hint-placeholder-count="4">
+        <div class="et-row" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.07);">
+          <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <dc-import name="CategoryIcon" category-id="{{tx.categoryId}}" color="{{tx.color}}" size="18" hint-size="18,18"></dc-import>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{tx.label}}</div>
+            <div style="font-size:12px;color:#898781;">{{tx.dateLabel}}</div>
+          </div>
+          <div style="font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0;">{{tx.amountLabel}}</div>
+        </div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{hasRecentNot}}" hint-placeholder-val="{{true}}">
+      <div style="text-align:center;padding:36px 10px;">
+        <div style="font-size:14.5px;color:#c3c2b7;margin-bottom:14px;">No expenses logged yet this month.</div>
+        <button class="et-btn-ghost" onClick="{{goAddFromHome}}">Add your first expense</button>
+      </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ============ ADD EXPENSE ============ -->
+  <sc-if value="{{isAdd}}" hint-placeholder-val="{{false}}">
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div class="et-scroll" style="flex:1;overflow-y:auto;padding:22px 20px 16px;">
+      <div style="font-size:20px;font-weight:700;margin-bottom:20px;">Add expense</div>
+
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:6px;border-bottom:2px solid rgba(255,255,255,0.14);padding-bottom:8px;">
+          <span style="font-size:32px;font-weight:700;color:#898781;">$</span>
+          <input type="number" inputmode="decimal" placeholder="0.00" value="{{formAmount}}" onChange="{{onAmountChange}}" style="border:none;outline:none;background:transparent;font-family:inherit;font-size:32px;font-weight:700;width:100%;color:#ffffff;"/>
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#c3c2b7;margin-bottom:10px;">Category</div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:22px;">
+        <sc-for list="{{categoryChips}}" as="cat" hint-placeholder-count="8">
+          <div class="et-row" onClick="{{cat.pick}}" style="cursor:pointer;border-radius:14px;border:1.5px solid {{cat.borderColor}};background:{{cat.bg}};padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;">
+            <dc-import name="CategoryIcon" category-id="{{cat.id}}" color="{{cat.color}}" size="22" hint-size="22,22"></dc-import>
+            <div style="font-size:10.5px;font-weight:600;line-height:1.2;color:#ffffff;">{{cat.name}}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#c3c2b7;margin-bottom:8px;">Date</div>
+      <input type="date" value="{{formDate}}" onChange="{{onDateChange}}" class="et-input" style="margin-bottom:20px;"/>
+
+      <div style="font-size:13px;font-weight:700;color:#c3c2b7;margin-bottom:8px;">Note</div>
+      <input type="text" placeholder="e.g. Trader Joe's" value="{{formNote}}" onChange="{{onNoteChange}}" class="et-input" style="margin-bottom:20px;"/>
+
+      <div style="font-size:13px;font-weight:700;color:#c3c2b7;margin-bottom:8px;">Payment method</div>
+      <div style="display:flex;gap:8px;margin-bottom:20px;">
+        <button onClick="{{setCash}}" style="flex:1;padding:11px;border-radius:12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:1.5px solid {{cashBorder}};background:{{cashBg}};color:{{cashText}};">Cash</button>
+        <button onClick="{{setCard}}" style="flex:1;padding:11px;border-radius:12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:1.5px solid {{cardBorder}};background:{{cardBg}};color:{{cardText}};">Card</button>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px 4px;margin-bottom:6px;">
+        <div>
+          <div style="font-size:14.5px;font-weight:600;">Recurring</div>
+          <div style="font-size:12px;color:#898781;">Get a reminder to log this again next month</div>
+        </div>
+        <div onClick="{{toggleRecurring}}" style="width:46px;height:27px;border-radius:14px;position:relative;cursor:pointer;flex-shrink:0;background:{{recurringSwitchBg}};">
+          <div style="position:absolute;top:2.5px;left:{{recurringThumbLeft}};width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.35);"></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:14px 20px;padding-bottom:max(14px, env(safe-area-inset-bottom, 14px));border-top:1px solid rgba(255,255,255,0.08);background:#0b0f0d;">
+      <button class="et-btn-primary" disabled="{{saveDisabled}}" onClick="{{saveExpense}}">Save expense</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ HISTORY ============ -->
+  <sc-if value="{{isHistory}}" hint-placeholder-val="{{false}}">
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:22px 20px 12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-size:20px;font-weight:700;">History</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="et-navbtn" onClick="{{prevHistoryMonth}}" style="font-size:18px;padding:2px 8px;color:#c3c2b7;">&#8249;</button>
+          <div style="font-size:13.5px;font-weight:600;min-width:96px;text-align:center;">{{historyMonthLabel}}</div>
+          <button class="et-navbtn" onClick="{{nextHistoryMonth}}" style="font-size:18px;padding:2px 8px;color:#c3c2b7;{{nextHistoryBtnStyle}}">&#8250;</button>
+        </div>
+      </div>
+      <div class="et-scroll" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">
+        <sc-for list="{{historyFilterChips}}" as="chip" hint-placeholder-count="9">
+          <button onClick="{{chip.pick}}" style="flex-shrink:0;padding:8px 14px;border-radius:20px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid {{chip.border}};background:{{chip.bg}};color:{{chip.textColor}};">{{chip.name}}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div class="et-scroll" style="flex:1;overflow-y:auto;padding:4px 20px 16px;">
+      <sc-if value="{{hasHistory}}" hint-placeholder-val="{{false}}">
+        <sc-for list="{{historyGroups}}" as="grp" hint-placeholder-count="3">
+          <div style="margin-top:16px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline;">
+            <div style="font-size:12.5px;font-weight:700;color:#898781;text-transform:uppercase;letter-spacing:0.02em;">{{grp.dateLabel}}</div>
+            <div style="font-size:12.5px;font-weight:600;color:#898781;">{{grp.totalLabel}}</div>
+          </div>
+          <sc-for list="{{grp.items}}" as="tx" hint-placeholder-count="2">
+            <div class="et-row" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.07);">
+              <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <dc-import name="CategoryIcon" category-id="{{tx.categoryId}}" color="{{tx.color}}" size="18" hint-size="18,18"></dc-import>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{tx.label}}</div>
+                <div style="font-size:12px;color:#898781;">{{tx.methodLabel}}</div>
+              </div>
+              <div style="font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0;">{{tx.amountLabel}}</div>
+              <button onClick="{{tx.remove}}" aria-label="Delete" style="background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;color:#686f6b;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M18 7l-.8 12.5a1.5 1.5 0 0 1-1.5 1.5H8.3a1.5 1.5 0 0 1-1.5-1.5L6 7"/></svg>
+              </button>
+            </div>
+          </sc-for>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{hasHistoryNot}}" hint-placeholder-val="{{true}}">
+        <div style="text-align:center;padding:48px 10px;font-size:14.5px;color:#898781;">No transactions for this month.</div>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ BUDGETS ============ -->
+  <sc-if value="{{isBudgets}}" hint-placeholder-val="{{false}}">
+  <div class="et-scroll" style="flex:1;overflow-y:auto;padding:22px 20px 16px;">
+    <div style="font-size:20px;font-weight:700;margin-bottom:18px;">Budgets</div>
+
+    <div style="background:#161a18;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:700;color:#c3c2b7;margin-bottom:8px;">Overall monthly budget</div>
+      <sc-if value="{{editingOverall}}" hint-placeholder-val="{{false}}">
+        <div style="display:flex;gap:8px;">
+          <input type="number" inputmode="decimal" placeholder="e.g. 2000" value="{{overallBudgetInput}}" onChange="{{onOverallBudgetInput}}" class="et-input"/>
+          <button class="et-btn-ghost" onClick="{{saveOverallBudget}}">Save</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{editingOverallNot}}" hint-placeholder-val="{{true}}">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:22px;font-weight:700;">{{overallBudgetDisplay}}</div>
+            <div style="font-size:12.5px;color:#898781;">{{overallSpentLabel}} spent this month</div>
+          </div>
+          <button class="et-btn-ghost" onClick="{{startEditOverall}}">Edit</button>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="font-size:13px;font-weight:700;color:#c3c2b7;margin-bottom:10px;">Per category</div>
+    <sc-for list="{{budgetRows}}" as="row" hint-placeholder-count="8">
+      <div style="background:#161a18;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 14px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <dc-import name="CategoryIcon" category-id="{{row.id}}" color="{{row.color}}" size="16" hint-size="16,16"></dc-import>
+          </div>
+          <div style="flex:1;font-size:14px;font-weight:600;">{{row.name}}</div>
+          <div style="font-size:13px;color:#898781;">{{row.spentLabel}}</div>
+        </div>
+        <sc-if value="{{row.hasBudget}}" hint-placeholder-val="{{false}}">
+          <div style="height:6px;border-radius:4px;background:rgba(255,255,255,0.12);overflow:hidden;margin-bottom:6px;">
+            <div style="height:100%;border-radius:4px;width:{{row.pct}}%;background:{{row.barColor}};"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{row.isEditing}}" hint-placeholder-val="{{false}}">
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <input type="number" inputmode="decimal" placeholder="Budget amount" value="{{editingCatBudgetInput}}" onChange="{{onCatBudgetInput}}" class="et-input" style="padding:9px 12px;font-size:14px;"/>
+            <button class="et-btn-ghost" onClick="{{saveCatBudget}}">Save</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{row.isEditingNot}}" hint-placeholder-val="{{true}}">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:12.5px;color:#898781;">{{row.budgetSummary}}</div>
+            <a href="javascript:void(0)" onClick="{{row.startEdit}}" style="font-size:12.5px;font-weight:600;text-decoration:none;">{{row.editLabel}}</a>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+  </sc-if>
+
+  <!-- ============ INSIGHTS ============ -->
+  <sc-if value="{{isInsights}}" hint-placeholder-val="{{false}}">
+  <div class="et-scroll" style="flex:1;overflow-y:auto;padding:22px 20px 24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div style="font-size:20px;font-weight:700;">Insights</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="et-navbtn" onClick="{{prevInsightsMonth}}" style="font-size:18px;padding:2px 8px;color:#c3c2b7;">&#8249;</button>
+        <div style="font-size:13.5px;font-weight:600;min-width:96px;text-align:center;">{{insightsMonthLabel}}</div>
+        <button class="et-navbtn" onClick="{{nextInsightsMonth}}" style="font-size:18px;padding:2px 8px;color:#c3c2b7;{{nextInsightsBtnStyle}}">&#8250;</button>
+      </div>
+    </div>
+
+    <sc-if value="{{hasInsightsDataNot}}" hint-placeholder-val="{{false}}">
+      <div style="text-align:center;padding:48px 10px;font-size:14.5px;color:#898781;">No spending recorded for {{insightsMonthLabel}}.</div>
+    </sc-if>
+
+    <sc-if value="{{hasInsightsData}}" hint-placeholder-val="{{true}}">
+      <!-- Spend by category -->
+      <div style="background:#161a18;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:700;">Spend by category</div>
+          <div style="display:flex;background:rgba(255,255,255,0.06);border-radius:10px;padding:3px;">
+            <button onClick="{{setDonutMode}}" style="border:none;border-radius:8px;padding:5px 11px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;background:{{donutModeBg}};color:{{donutModeText}};">Donut</button>
+            <button onClick="{{setBarMode}}" style="border:none;border-radius:8px;padding:5px 11px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;background:{{barModeBg}};color:{{barModeText}};">Bars</button>
+          </div>
+        </div>
+
+        <sc-if value="{{isDonutMode}}" hint-placeholder-val="{{true}}">
+          <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <svg width="150" height="150" viewBox="0 0 120 120">
+              <sc-for list="{{donutSegments}}" as="seg" hint-placeholder-count="4">
+                <path d="{{seg.pathD}}" fill="{{seg.color}}"></path>
+              </sc-for>
+              <text x="60" y="57" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" font-family="system-ui,-apple-system,sans-serif">{{insightsTotalLabel}}</text>
+              <text x="60" y="73" text-anchor="middle" font-size="9.5" fill="#898781" font-family="system-ui,-apple-system,sans-serif">total spend</text>
+            </svg>
+          </div>
+          <sc-for list="{{legendRows}}" as="lg" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+              <div style="width:10px;height:10px;border-radius:3px;background:{{lg.color}};flex-shrink:0;"></div>
+              <div style="flex:1;font-size:13px;color:#ffffff;">{{lg.name}}</div>
+              <div style="font-size:12px;color:#898781;">{{lg.pctLabel}}</div>
+              <div style="font-size:13px;font-weight:600;min-width:64px;text-align:right;">{{lg.totalLabel}}</div>
+            </div>
+          </sc-for>
+        </sc-if>
+
+        <sc-if value="{{isBarMode}}" hint-placeholder-val="{{false}}">
+          <sc-for list="{{barRows}}" as="br" hint-placeholder-count="4">
+            <div style="margin-bottom:11px;">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;">
+                <span>{{br.name}}</span>
+                <span style="font-weight:600;">{{br.totalLabel}}</span>
+              </div>
+              <div style="height:8px;border-radius:4px;background:rgba(255,255,255,0.10);overflow:hidden;">
+                <div style="height:100%;border-radius:4px;width:{{br.widthPct}}%;background:{{br.color}};"></div>
+              </div>
+            </div>
+          </sc-for>
+        </sc-if>
+      </div>
+
+      <!-- This month vs last month -->
+      <div style="background:#161a18;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">This month vs last month</div>
+        <div style="font-size:12.5px;color:{{deltaColor}};font-weight:600;margin-bottom:14px;">{{deltaSummary}}</div>
+        <div style="display:flex;gap:14px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:3px;background:#2fe6ac;"></div><span style="font-size:11.5px;color:#c3c2b7;">This month</span></div>
+          <div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:3px;background:rgba(255,255,255,0.30);"></div><span style="font-size:11.5px;color:#c3c2b7;">Last month</span></div>
+        </div>
+        <sc-for list="{{vsRows}}" as="vr" hint-placeholder-count="4">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12.5px;margin-bottom:4px;">{{vr.name}}</div>
+            <div style="height:7px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:3px;">
+              <div style="height:100%;border-radius:4px;width:{{vr.thisWidth}}%;background:#2fe6ac;"></div>
+            </div>
+            <div style="height:7px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;">
+              <div style="height:100%;border-radius:4px;width:{{vr.lastWidth}}%;background:rgba(255,255,255,0.30);"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- Daily running total -->
+      <div style="background:#161a18;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:14px;font-weight:700;margin-bottom:2px;">Daily running total</div>
+        <div style="font-size:12px;color:#898781;margin-bottom:10px;">{{hoverLabel}}</div>
+        <svg viewBox="0 0 320 130" width="100%" height="140" onMouseLeave="{{onChartLeave}}" style="overflow:visible;">
+          <line x1="6" y1="8" x2="6" y2="122" stroke="rgba(255,255,255,0.10)" stroke-width="1"></line>
+          <line x1="6" y1="122" x2="314" y2="122" stroke="rgba(255,255,255,0.25)" stroke-width="1"></line>
+          <path d="{{areaPath}}" fill="rgba(47,230,172,0.16)" stroke="none"></path>
+          <path d="{{linePath}}" fill="none" stroke="#2fe6ac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          <circle cx="{{hoverPoint.x}}" cy="{{hoverPoint.y}}" r="4" fill="#2fe6ac" stroke="#0b0f0d" stroke-width="2"></circle>
+          <sc-for list="{{dayHitboxes}}" as="hb" hint-placeholder-count="30">
+            <rect x="{{hb.x}}" y="0" width="{{hb.w}}" height="130" fill="transparent" onClick="{{hb.onHover}}"></rect>
+          </sc-for>
+        </svg>
+      </div>
+
+      <!-- Budget progress -->
+      <sc-if value="{{hasInsightsBudgets}}" hint-placeholder-val="{{false}}">
+        <div style="background:#161a18;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Budget progress</div>
+          <sc-for list="{{insightsBudgetRows}}" as="ib" hint-placeholder-count="4">
+            <div style="margin-bottom:11px;">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;">
+                <span>{{ib.name}}</span>
+                <span style="color:#898781;">{{ib.label}}</span>
+              </div>
+              <div style="height:7px;border-radius:4px;background:rgba(255,255,255,0.12);overflow:hidden;">
+                <div style="height:100%;border-radius:4px;width:{{ib.pct}}%;background:{{ib.barColor}};"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- Top expenses -->
+      <sc-if value="{{hasTopExpenses}}" hint-placeholder-val="{{false}}">
+        <div style="background:#161a18;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Biggest expenses</div>
+          <sc-for list="{{topExpenses}}" as="top" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.07);">
+              <div style="width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <dc-import name="CategoryIcon" category-id="{{top.categoryId}}" color="{{top.color}}" size="16" hint-size="16,16"></dc-import>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{top.label}}</div>
+                <div style="font-size:11.5px;color:#898781;">{{top.dateLabel}}</div>
+              </div>
+              <div style="font-size:13.5px;font-weight:600;font-variant-numeric:tabular-nums;">{{top.amountLabel}}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ============ BOTTOM NAV ============ -->
+  <div style="display:flex;align-items:stretch;border-top:1px solid rgba(255,255,255,0.08);background:#121614;padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0;">
+    <button class="et-navbtn" onClick="{{goHome}}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{navHomeColor}};">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5L12 4.5l8 7"/><path d="M6 10.5v8.5a1 1 0 0 0 1 1h3.2v-5.3h3.6v5.3H17a1 1 0 0 0 1-1v-8.5"/></svg>
+      <span style="font-size:10.5px;font-weight:600;">Home</span>
+    </button>
+    <button class="et-navbtn" onClick="{{goHistory}}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{navHistoryColor}};">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.1"/><circle cx="4.5" cy="12" r="1.1"/><circle cx="4.5" cy="18" r="1.1"/></svg>
+      <span style="font-size:10.5px;font-weight:600;">History</span>
+    </button>
+    <button class="et-navbtn" onClick="{{goAdd}}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#2fe6ac;">
+      <div style="width:38px;height:38px;border-radius:50%;background:#2fe6ac;display:flex;align-items:center;justify-content:center;margin-top:-16px;box-shadow:0 4px 14px rgba(47,230,172,0.5);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06140f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+      <span style="font-size:10.5px;font-weight:600;margin-top:-2px;">Add</span>
+    </button>
+    <button class="et-navbtn" onClick="{{goBudgets}}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{navBudgetsColor}};">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12l7.3 4.2"/></svg>
+      <span style="font-size:10.5px;font-weight:600;">Budgets</span>
+    </button>
+    <button class="et-navbtn" onClick="{{goInsights}}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:{{navInsightsColor}};">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V13.5M11 20V8M18 20v-6"/><path d="M2.5 20h19" stroke-linecap="round"/></svg>
+      <span style="font-size:10.5px;font-weight:600;">Insights</span>
+    </button>
+  </div>
+
+  <!-- ============ DELETE MODAL ============ -->
+  <sc-if value="{{showDeleteModal}}" hint-placeholder-val="{{false}}">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:30px;">
+      <div style="background:#1c2220;border:1px solid rgba(255,255,255,0.10);border-radius:16px;padding:20px;width:100%;max-width:300px;">
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Delete expense?</div>
+        <div style="font-size:13px;color:#c3c2b7;margin-bottom:18px;">This can't be undone.</div>
+        <div style="display:flex;gap:8px;">
+          <button class="et-btn-ghost" onClick="{{cancelDelete}}" style="flex:1;">Cancel</button>
+          <button onClick="{{performDelete}}" style="flex:1;background:#d03b3b;color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">Delete</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ TOAST ============ -->
+  <sc-if value="{{showToast}}" hint-placeholder-val="{{false}}">
+    <div class="et-toast" style="position:absolute;left:20px;right:20px;bottom:88px;background:#2fe6ac;color:#06140f;border-radius:12px;padding:12px 16px;font-size:13.5px;font-weight:700;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.45);">{{toastMsg}}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script data-dc-script>
+var CATEGORIES = [
+  { id: 'groceries', name: 'Groceries', color: '#3987e5' },
+  { id: 'dining', name: 'Dining & Takeout', color: '#d95926' },
+  { id: 'transport', name: 'Transport & Fuel', color: '#199e70' },
+  { id: 'rent', name: 'Rent & Utilities', color: '#c98500' },
+  { id: 'shopping', name: 'Shopping & Clothing', color: '#d55181' },
+  { id: 'subscriptions', name: 'Subscriptions', color: '#3ab53a' },
+  { id: 'entertainment', name: 'Entertainment', color: '#9085e9' },
+  { id: 'travel', name: 'Travel', color: '#e66767' }
+];
+var CAT_BY_ID = {};
+CATEGORIES.forEach(function (c) { CAT_BY_ID[c.id] = c; });
+var STORAGE_KEY = 'et_data_v1';
+
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+function todayISO() { var d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function nowMonthKey() { return todayISO().slice(0, 7); }
+function monthKeyOf(dateStr) { return dateStr.slice(0, 7); }
+function addMonths(monthKey, delta) {
+  var parts = monthKey.split('-'); var y = parseInt(parts[0], 10); var m = parseInt(parts[1], 10) - 1;
+  m += delta; y += Math.floor(m / 12); m = ((m % 12) + 12) % 12;
+  return y + '-' + pad2(m + 1);
+}
+function monthLabel(monthKey) {
+  var parts = monthKey.split('-'); var y = parseInt(parts[0], 10); var m = parseInt(parts[1], 10) - 1;
+  var d = new Date(y, m, 1);
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+function daysInMonthOf(monthKey) {
+  var parts = monthKey.split('-'); var y = parseInt(parts[0], 10); var m = parseInt(parts[1], 10);
+  return new Date(y, m, 0).getDate();
+}
+function fmtMoney(n) {
+  var v = (n === null || n === undefined || isNaN(n)) ? 0 : n;
+  return v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+}
+function shiftDay(dateStr, delta) {
+  var parts = dateStr.split('-');
+  var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+  d.setDate(d.getDate() + delta);
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+function fmtDateGroup(dateStr) {
+  var today = todayISO(); var yest = shiftDay(today, -1);
+  if (dateStr === today) return 'Today';
+  if (dateStr === yest) return 'Yesterday';
+  var parts = dateStr.split('-');
+  var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function hexToRgba(hex, alpha) {
+  var h = hex.replace('#', '');
+  var r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+function arcPath(cx, cy, rOuter, rInner, startA, endA) {
+  var x0 = cx + rOuter * Math.cos(startA), y0 = cy + rOuter * Math.sin(startA);
+  var x1 = cx + rOuter * Math.cos(endA), y1 = cy + rOuter * Math.sin(endA);
+  var x2 = cx + rInner * Math.cos(endA), y2 = cy + rInner * Math.sin(endA);
+  var x3 = cx + rInner * Math.cos(startA), y3 = cy + rInner * Math.sin(startA);
+  var largeArc = (endA - startA) > Math.PI ? 1 : 0;
+  return 'M ' + x0 + ' ' + y0 + ' A ' + rOuter + ' ' + rOuter + ' 0 ' + largeArc + ' 1 ' + x1 + ' ' + y1 + ' L ' + x2 + ' ' + y2 + ' A ' + rInner + ' ' + rInner + ' 0 ' + largeArc + ' 0 ' + x3 + ' ' + y3 + ' Z';
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tab: 'home',
+      expenses: [],
+      budgets: { overall: null, byCategory: {} },
+      recurringTemplates: [],
+      historyMonth: nowMonthKey(),
+      insightsMonth: nowMonthKey(),
+      historyFilter: 'all',
+      categoryChartMode: 'donut',
+      formAmount: '', formCategory: null, formDate: todayISO(), formNote: '', formMethod: 'card', formRecurring: false,
+      overallBudgetInput: '', editingOverall: false,
+      editingCat: null, catBudgetInput: '',
+      confirmDeleteId: null, toastMsg: null, toastToken: null, hoverDayIndex: null
+    };
+    this.selectTab = this.selectTab.bind(this);
+    this.goAddFromHome = this.goAddFromHome.bind(this);
+    this.goHistoryFromHome = this.goHistoryFromHome.bind(this);
+    this.pickCategory = this.pickCategory.bind(this);
+    this.setMethod = this.setMethod.bind(this);
+    this.toggleRecurring = this.toggleRecurring.bind(this);
+    this.onAmountChange = this.onAmountChange.bind(this);
+    this.onDateChange = this.onDateChange.bind(this);
+    this.onNoteChange = this.onNoteChange.bind(this);
+    this.saveExpense = this.saveExpense.bind(this);
+    this.confirmRecurring = this.confirmRecurring.bind(this);
+    this.requestDelete = this.requestDelete.bind(this);
+    this.cancelDelete = this.cancelDelete.bind(this);
+    this.performDelete = this.performDelete.bind(this);
+    this.shiftHistoryMonth = this.shiftHistoryMonth.bind(this);
+    this.shiftInsightsMonth = this.shiftInsightsMonth.bind(this);
+    this.setHistoryFilter = this.setHistoryFilter.bind(this);
+    this.setChartMode = this.setChartMode.bind(this);
+    this.onOverallBudgetInput = this.onOverallBudgetInput.bind(this);
+    this.startEditOverall = this.startEditOverall.bind(this);
+    this.saveOverallBudget = this.saveOverallBudget.bind(this);
+    this.startEditCatBudget = this.startEditCatBudget.bind(this);
+    this.onCatBudgetInput = this.onCatBudgetInput.bind(this);
+    this.saveCatBudget = this.saveCatBudget.bind(this);
+    this.onChartHover = this.onChartHover.bind(this);
+    this.onChartLeave = this.onChartLeave.bind(this);
+  }
+
+  componentDidMount() {
+    try {
+      var raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var data = JSON.parse(raw);
+        this.setState({
+          expenses: data.expenses || [],
+          budgets: data.budgets || { overall: null, byCategory: {} },
+          recurringTemplates: data.recurringTemplates || []
+        });
+      }
+    } catch (e) {}
+  }
+
+  persist() {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        expenses: this.state.expenses,
+        budgets: this.state.budgets,
+        recurringTemplates: this.state.recurringTemplates
+      }));
+    } catch (e) {}
+  }
+
+  showToast(msg) {
+    var self = this;
+    var token = uid();
+    this.setState({ toastMsg: msg, toastToken: token });
+    setTimeout(function () {
+      self.setState(function (s) { return s.toastToken === token ? { toastMsg: null, toastToken: null } : {}; });
+    }, 2200);
+  }
+
+  selectTab(tab) { this.setState({ tab: tab }); }
+  goAddFromHome() { this.setState({ tab: 'add' }); }
+  goHistoryFromHome() { this.setState({ tab: 'history' }); }
+
+  pickCategory(id) { this.setState({ formCategory: id }); }
+  setMethod(m) { this.setState({ formMethod: m }); }
+  toggleRecurring() { this.setState({ formRecurring: !this.state.formRecurring }); }
+  onAmountChange(e) { this.setState({ formAmount: e.target.value }); }
+  onDateChange(e) { this.setState({ formDate: e.target.value }); }
+  onNoteChange(e) { this.setState({ formNote: e.target.value }); }
+
+  saveExpense() {
+    var amt = parseFloat(this.state.formAmount);
+    if (!amt || amt <= 0 || !this.state.formCategory) return;
+    var self = this;
+    var noteTrim = (this.state.formNote || '').trim();
+    var expense = {
+      id: uid(), amount: amt, categoryId: this.state.formCategory,
+      date: this.state.formDate || todayISO(), note: noteTrim, method: this.state.formMethod, recurringId: null
+    };
+    var templates = this.state.recurringTemplates.slice();
+    if (this.state.formRecurring) {
+      var existingIdx = -1;
+      for (var i = 0; i < templates.length; i++) {
+        if (templates[i].categoryId === expense.categoryId && (templates[i].note || '').toLowerCase() === noteTrim.toLowerCase()) { existingIdx = i; break; }
+      }
+      if (existingIdx !== -1) {
+        var updated = Object.assign({}, templates[existingIdx], { amount: amt, method: expense.method, lastLoggedMonth: nowMonthKey() });
+        templates[existingIdx] = updated;
+        expense.recurringId = updated.id;
+      } else {
+        var tpl = { id: uid(), categoryId: expense.categoryId, note: noteTrim, amount: amt, method: expense.method, lastLoggedMonth: nowMonthKey() };
+        templates.push(tpl);
+        expense.recurringId = tpl.id;
+      }
+    }
+    this.setState({
+      expenses: this.state.expenses.concat([expense]), recurringTemplates: templates,
+      formAmount: '', formCategory: null, formNote: '', formMethod: 'card', formRecurring: false, formDate: todayISO(),
+      tab: 'home'
+    }, function () { self.persist(); self.showToast('Expense added'); });
+  }
+
+  confirmRecurring(templateId) {
+    var self = this;
+    var tpl = null;
+    for (var i = 0; i < this.state.recurringTemplates.length; i++) { if (this.state.recurringTemplates[i].id === templateId) { tpl = this.state.recurringTemplates[i]; break; } }
+    if (!tpl) return;
+    var expense = { id: uid(), amount: tpl.amount, categoryId: tpl.categoryId, date: todayISO(), note: tpl.note, method: tpl.method, recurringId: tpl.id };
+    var templates = this.state.recurringTemplates.map(function (t) {
+      return t.id === templateId ? Object.assign({}, t, { lastLoggedMonth: nowMonthKey() }) : t;
+    });
+    this.setState({ expenses: this.state.expenses.concat([expense]), recurringTemplates: templates }, function () { self.persist(); self.showToast('Logged ' + fmtMoney(tpl.amount)); });
+  }
+
+  requestDelete(id) { this.setState({ confirmDeleteId: id }); }
+  cancelDelete() { this.setState({ confirmDeleteId: null }); }
+  performDelete() {
+    var self = this; var id = this.state.confirmDeleteId;
+    this.setState({ expenses: this.state.expenses.filter(function (e) { return e.id !== id; }), confirmDeleteId: null }, function () { self.persist(); });
+  }
+
+  shiftHistoryMonth(delta) {
+    var next = addMonths(this.state.historyMonth, delta);
+    if (next > nowMonthKey()) return;
+    this.setState({ historyMonth: next });
+  }
+  shiftInsightsMonth(delta) {
+    var next = addMonths(this.state.insightsMonth, delta);
+    if (next > nowMonthKey()) return;
+    this.setState({ insightsMonth: next });
+  }
+  setHistoryFilter(id) { this.setState({ historyFilter: id }); }
+  setChartMode(mode) { this.setState({ categoryChartMode: mode }); }
+
+  onOverallBudgetInput(e) { this.setState({ overallBudgetInput: e.target.value }); }
+  startEditOverall() {
+    this.setState({ editingOverall: true, overallBudgetInput: this.state.budgets.overall ? String(this.state.budgets.overall) : '' });
+  }
+  saveOverallBudget() {
+    var self = this;
+    var v = parseFloat(this.state.overallBudgetInput);
+    var budgets = Object.assign({}, this.state.budgets, { overall: (v && v > 0) ? v : null });
+    this.setState({ budgets: budgets, overallBudgetInput: '', editingOverall: false }, function () { self.persist(); });
+  }
+  startEditCatBudget(catId, current) {
+    this.setState({ editingCat: catId, catBudgetInput: current ? String(current) : '' });
+  }
+  onCatBudgetInput(e) { this.setState({ catBudgetInput: e.target.value }); }
+  saveCatBudget() {
+    var self = this;
+    var catId = this.state.editingCat;
+    if (!catId) return;
+    var v = parseFloat(this.state.catBudgetInput);
+    var byCat = Object.assign({}, this.state.budgets.byCategory);
+    if (v && v > 0) byCat[catId] = v; else delete byCat[catId];
+    var budgets = Object.assign({}, this.state.budgets, { byCategory: byCat });
+    this.setState({ budgets: budgets, editingCat: null, catBudgetInput: '' }, function () { self.persist(); });
+  }
+
+  onChartHover(idx) { this.setState({ hoverDayIndex: idx }); }
+  onChartLeave() { this.setState({ hoverDayIndex: null }); }
+
+  renderVals() {
+    var self = this;
+    var s = this.state;
+    var nowKey = nowMonthKey();
+
+    var homeExpenses = s.expenses.filter(function (e) { return monthKeyOf(e.date) === nowKey; });
+    var homeTotal = homeExpenses.reduce(function (a, e) { return a + e.amount; }, 0);
+    var overallBudget = s.budgets.overall;
+    var overallPct = overallBudget ? Math.min(100, homeTotal / overallBudget * 100) : 0;
+    var overallBarColor = !overallBudget ? '#2fe6ac' : (homeTotal / overallBudget >= 1 ? '#d03b3b' : (homeTotal / overallBudget >= 0.8 ? '#fab219' : '#2fe6ac'));
+
+    function enrichExpenseRow(e) {
+      var cat = CAT_BY_ID[e.categoryId];
+      return {
+        id: e.id, categoryId: e.categoryId, color: cat.color, catName: cat.name,
+        label: e.note ? e.note : cat.name,
+        amountLabel: fmtMoney(e.amount),
+        dateLabel: fmtDateGroup(e.date),
+        methodLabel: e.method === 'cash' ? 'Cash' : 'Card',
+        remove: function () { self.requestDelete(e.id); }
+      };
+    }
+
+    var dueTemplates = s.recurringTemplates.filter(function (t) { return t.lastLoggedMonth !== nowKey; }).map(function (t) {
+      var cat = CAT_BY_ID[t.categoryId];
+      return { id: t.id, name: t.note || cat.name, categoryId: t.categoryId, color: cat.color, amountLabel: fmtMoney(t.amount), confirm: function () { self.confirmRecurring(t.id); } };
+    });
+
+    var recentSorted = homeExpenses.slice().sort(function (a, b) {
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return a.id < b.id ? 1 : -1;
+    }).slice(0, 5);
+    var recentList = recentSorted.map(enrichExpenseRow);
+
+    var categoryChips = CATEGORIES.map(function (c) {
+      var selected = c.id === s.formCategory;
+      return { id: c.id, name: c.name, color: c.color, selected: selected, borderColor: selected ? c.color : 'rgba(255,255,255,0.14)', bg: selected ? hexToRgba(c.color, 0.16) : '#171b19', pick: function () { self.pickCategory(c.id); } };
+    });
+    var canSave = !!(parseFloat(s.formAmount) > 0 && s.formCategory);
+
+    var allChip = { id: 'all', name: 'All', color: '#2fe6ac' };
+    var historyFilterChips = [allChip].concat(CATEGORIES).map(function (c) {
+      var active = c.id === s.historyFilter;
+      return {
+        id: c.id, name: c.name, active: active,
+        bg: active ? (c.id === 'all' ? '#2fe6ac' : hexToRgba(c.color, 0.18)) : '#171b19',
+        border: active ? (c.id === 'all' ? '#2fe6ac' : c.color) : 'rgba(255,255,255,0.14)',
+        textColor: active ? (c.id === 'all' ? '#06140f' : '#ffffff') : '#c3c2b7',
+        pick: function () { self.setHistoryFilter(c.id); }
+      };
+    });
+    var historyRaw = s.expenses.filter(function (e) {
+      return monthKeyOf(e.date) === s.historyMonth && (s.historyFilter === 'all' || e.categoryId === s.historyFilter);
+    }).sort(function (a, b) {
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return a.id < b.id ? 1 : -1;
+    });
+    var historyGroups = [];
+    historyRaw.forEach(function (e) {
+      var last = historyGroups[historyGroups.length - 1];
+      if (last && last.dateKey === e.date) { last.items.push(enrichExpenseRow(e)); last.total += e.amount; }
+      else { historyGroups.push({ dateKey: e.date, dateLabel: fmtDateGroup(e.date), total: e.amount, items: [enrichExpenseRow(e)] }); }
+    });
+    historyGroups.forEach(function (g) { g.totalLabel = fmtMoney(g.total); });
+    var canGoNextHistory = addMonths(s.historyMonth, 1) <= nowKey;
+
+    var budgetRows = CATEGORIES.map(function (c) {
+      var spent = homeExpenses.filter(function (e) { return e.categoryId === c.id; }).reduce(function (a, e) { return a + e.amount; }, 0);
+      var budget = s.budgets.byCategory[c.id] || null;
+      var pct = budget ? Math.min(100, spent / budget * 100) : 0;
+      var barColor = !budget ? 'rgba(255,255,255,0.14)' : (spent / budget >= 1 ? '#d03b3b' : (spent / budget >= 0.8 ? '#fab219' : '#0ca30c'));
+      var isEditing = s.editingCat === c.id;
+      return {
+        id: c.id, name: c.name, color: c.color, spentLabel: fmtMoney(spent), hasBudget: !!budget, pct: pct, barColor: barColor,
+        isEditing: isEditing, isEditingNot: !isEditing,
+        budgetSummary: budget ? (fmtMoney(spent) + ' of ' + fmtMoney(budget) + ' (' + Math.round(spent / budget * 100) + '%)') : 'No budget set',
+        editLabel: budget ? 'Edit' : 'Set budget',
+        startEdit: function () { self.startEditCatBudget(c.id, budget); }
+      };
+    });
+
+    var insightsExpenses = s.expenses.filter(function (e) { return monthKeyOf(e.date) === s.insightsMonth; });
+    var insightsTotal = insightsExpenses.reduce(function (a, e) { return a + e.amount; }, 0);
+    var prevMonthKey = addMonths(s.insightsMonth, -1);
+    var prevExpenses = s.expenses.filter(function (e) { return monthKeyOf(e.date) === prevMonthKey; });
+    var prevTotal = prevExpenses.reduce(function (a, e) { return a + e.amount; }, 0);
+    var deltaAmt = insightsTotal - prevTotal;
+    var deltaIsLess = deltaAmt <= 0;
+    var canGoNextInsights = addMonths(s.insightsMonth, 1) <= nowKey;
+    var hasInsightsData = insightsExpenses.length > 0;
+
+    var catTotalsRaw = CATEGORIES.map(function (c) {
+      var total = insightsExpenses.filter(function (e) { return e.categoryId === c.id; }).reduce(function (a, e) { return a + e.amount; }, 0);
+      return { id: c.id, name: c.name, color: c.color, total: total };
+    }).filter(function (c) { return c.total > 0; });
+    catTotalsRaw.sort(function (a, b) { return b.total - a.total; });
+    var maxCatTotal = catTotalsRaw.length ? catTotalsRaw[0].total : 0;
+
+    var donutSegments = [];
+    if (insightsTotal > 0) {
+      var angle = -Math.PI / 2;
+      var gap = catTotalsRaw.length > 1 ? 0.05 : 0;
+      catTotalsRaw.forEach(function (c) {
+        var sweep = Math.min((c.total / insightsTotal) * (2 * Math.PI), 2 * Math.PI - 0.0005);
+        var start = angle + gap / 2;
+        var end = angle + sweep - gap / 2;
+        if (end < start) end = start;
+        donutSegments.push({ id: c.id, color: c.color, pathD: arcPath(60, 60, 54, 34, start, end) });
+        angle += sweep;
+      });
+    }
+    var legendRows = catTotalsRaw.map(function (c) {
+      return { id: c.id, name: c.name, color: c.color, totalLabel: fmtMoney(c.total), pctLabel: Math.round(c.total / insightsTotal * 100) + '%' };
+    });
+    var barRows = catTotalsRaw.map(function (c) {
+      return { id: c.id, name: c.name, color: c.color, totalLabel: fmtMoney(c.total), widthPct: maxCatTotal ? (c.total / maxCatTotal * 100) : 0 };
+    });
+
+    var maxVsValue = 1;
+    CATEGORIES.forEach(function (c) {
+      var t = insightsExpenses.filter(function (e) { return e.categoryId === c.id; }).reduce(function (a, e) { return a + e.amount; }, 0);
+      var p = prevExpenses.filter(function (e) { return e.categoryId === c.id; }).reduce(function (a, e) { return a + e.amount; }, 0);
+      maxVsValue = Math.max(maxVsValue, t, p);
+    });
+    var vsRows = CATEGORIES.map(function (c) {
+      var t = insightsExpenses.filter(function (e) { return e.categoryId === c.id; }).reduce(function (a, e) { return a + e.amount; }, 0);
+      var p = prevExpenses.filter(function (e) { return e.categoryId === c.id; }).reduce(function (a, e) { return a + e.amount; }, 0);
+      return { id: c.id, name: c.name, thisWidth: t / maxVsValue * 100, lastWidth: p / maxVsValue * 100 };
+    }).filter(function (r) { return r.thisWidth > 0.01 || r.lastWidth > 0.01; });
+
+    var dim = daysInMonthOf(s.insightsMonth);
+    var dayTotals = [];
+    for (var d = 1; d <= dim; d++) dayTotals.push(0);
+    insightsExpenses.forEach(function (e) {
+      var dayNum = parseInt(e.date.slice(8, 10), 10);
+      dayTotals[dayNum - 1] += e.amount;
+    });
+    var cum = 0; var cumSeries = [];
+    for (var i = 0; i < dim; i++) { cum += dayTotals[i]; cumSeries.push(cum); }
+    var maxCum = 1;
+    for (var j = 0; j < cumSeries.length; j++) { if (cumSeries[j] > maxCum) maxCum = cumSeries[j]; }
+    var VB_W = 320, VB_H = 130, padL = 6, padR = 6, padT = 8, padB = 8;
+    var plotW = VB_W - padL - padR, plotH = VB_H - padT - padB;
+    var points = cumSeries.map(function (v, idx) {
+      var x = padL + (dim === 1 ? 0 : (idx / (dim - 1)) * plotW);
+      var y = padT + plotH - (v / maxCum * plotH);
+      return { x: x, y: y };
+    });
+    var linePath = points.map(function (p, idx) { return (idx === 0 ? 'M ' : 'L ') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
+    var areaPath = linePath + ' L ' + points[points.length - 1].x.toFixed(1) + ' ' + (padT + plotH) + ' L ' + points[0].x.toFixed(1) + ' ' + (padT + plotH) + ' Z';
+    var hoverIdx = (s.hoverDayIndex !== null && s.hoverDayIndex < dim) ? s.hoverDayIndex : (dim - 1);
+    var hoverPoint = points[hoverIdx];
+    var hoverLabel = 'Day ' + (hoverIdx + 1) + ' · ' + fmtMoney(cumSeries[hoverIdx]) + ' cumulative';
+    var dayHitboxes = cumSeries.map(function (v, idx) {
+      var x = padL + (dim === 1 ? 0 : (idx / (dim - 1)) * plotW) - (plotW / dim / 2);
+      return { idx: idx, x: Math.max(0, x), w: plotW / dim, onHover: function () { self.onChartHover(idx); } };
+    });
+
+    var insightsBudgetRows = [];
+    CATEGORIES.forEach(function (c) {
+      var budget = s.budgets.byCategory[c.id] || null;
+      if (!budget) return;
+      var spent = insightsExpenses.filter(function (e) { return e.categoryId === c.id; }).reduce(function (a, e) { return a + e.amount; }, 0);
+      var pct = Math.min(100, spent / budget * 100);
+      var barColor = spent / budget >= 1 ? '#d03b3b' : (spent / budget >= 0.8 ? '#fab219' : '#0ca30c');
+      insightsBudgetRows.push({ id: c.id, name: c.name, color: c.color, pct: pct, barColor: barColor, label: fmtMoney(spent) + ' / ' + fmtMoney(budget) });
+    });
+
+    var topExpenses = insightsExpenses.slice().sort(function (a, b) { return b.amount - a.amount; }).slice(0, 5).map(function (e) {
+      var cat = CAT_BY_ID[e.categoryId];
+      return { id: e.id, categoryId: e.categoryId, color: cat.color, label: e.note || cat.name, dateLabel: fmtDateGroup(e.date), amountLabel: fmtMoney(e.amount) };
+    });
+
+    return {
+      isHome: s.tab === 'home', isAdd: s.tab === 'add', isHistory: s.tab === 'history', isBudgets: s.tab === 'budgets', isInsights: s.tab === 'insights',
+      goHome: function () { self.selectTab('home'); }, goAdd: function () { self.selectTab('add'); }, goHistory: function () { self.selectTab('history'); }, goBudgets: function () { self.selectTab('budgets'); }, goInsights: function () { self.selectTab('insights'); },
+      navHomeColor: s.tab === 'home' ? '#2fe6ac' : '#898781',
+      navHistoryColor: s.tab === 'history' ? '#2fe6ac' : '#898781',
+      navBudgetsColor: s.tab === 'budgets' ? '#2fe6ac' : '#898781',
+      navInsightsColor: s.tab === 'insights' ? '#2fe6ac' : '#898781',
+
+      monthLabelNow: monthLabel(nowKey),
+      homeTotalLabel: fmtMoney(homeTotal),
+      hasOverallBudget: !!overallBudget,
+      overallBudgetLabel: overallBudget ? fmtMoney(overallBudget) : null,
+      overallPct: overallPct, overallBarColor: overallBarColor,
+      hasDue: dueTemplates.length > 0, dueTemplates: dueTemplates,
+      hasRecent: recentList.length > 0, hasRecentNot: recentList.length === 0, recentList: recentList,
+      goAddFromHome: this.goAddFromHome, goHistoryFromHome: this.goHistoryFromHome,
+
+      formAmount: s.formAmount, onAmountChange: this.onAmountChange,
+      categoryChips: categoryChips,
+      formDate: s.formDate, onDateChange: this.onDateChange,
+      formNote: s.formNote, onNoteChange: this.onNoteChange,
+      cashBorder: s.formMethod === 'cash' ? '#2fe6ac' : 'rgba(255,255,255,0.14)', cashBg: s.formMethod === 'cash' ? '#2fe6ac' : '#171b19', cashText: s.formMethod === 'cash' ? '#06140f' : '#c3c2b7',
+      cardBorder: s.formMethod === 'card' ? '#2fe6ac' : 'rgba(255,255,255,0.14)', cardBg: s.formMethod === 'card' ? '#2fe6ac' : '#171b19', cardText: s.formMethod === 'card' ? '#06140f' : '#c3c2b7',
+      setCash: function () { self.setMethod('cash'); }, setCard: function () { self.setMethod('card'); },
+      formRecurring: s.formRecurring, toggleRecurring: this.toggleRecurring,
+      recurringSwitchBg: s.formRecurring ? '#2fe6ac' : 'rgba(255,255,255,0.14)', recurringThumbLeft: s.formRecurring ? '22px' : '2.5px',
+      saveDisabled: !canSave, saveExpense: this.saveExpense,
+
+      historyMonthLabel: monthLabel(s.historyMonth),
+      prevHistoryMonth: function () { self.shiftHistoryMonth(-1); },
+      nextHistoryMonth: function () { self.shiftHistoryMonth(1); },
+      nextHistoryBtnStyle: canGoNextHistory ? 'opacity:1;' : 'opacity:0.3;pointer-events:none;',
+      historyFilterChips: historyFilterChips,
+      hasHistory: historyGroups.length > 0, hasHistoryNot: historyGroups.length === 0, historyGroups: historyGroups,
+
+      editingOverall: s.editingOverall, editingOverallNot: !s.editingOverall,
+      overallBudgetInput: s.overallBudgetInput, onOverallBudgetInput: this.onOverallBudgetInput,
+      startEditOverall: this.startEditOverall, saveOverallBudget: this.saveOverallBudget,
+      overallBudgetDisplay: overallBudget ? fmtMoney(overallBudget) : 'Not set',
+      overallSpentLabel: fmtMoney(homeTotal),
+      budgetRows: budgetRows,
+      editingCatBudgetInput: s.catBudgetInput, onCatBudgetInput: this.onCatBudgetInput, saveCatBudget: this.saveCatBudget,
+
+      insightsMonthLabel: monthLabel(s.insightsMonth),
+      prevInsightsMonth: function () { self.shiftInsightsMonth(-1); },
+      nextInsightsMonth: function () { self.shiftInsightsMonth(1); },
+      nextInsightsBtnStyle: canGoNextInsights ? 'opacity:1;' : 'opacity:0.3;pointer-events:none;',
+      hasInsightsData: hasInsightsData, hasInsightsDataNot: !hasInsightsData,
+      insightsTotalLabel: fmtMoney(insightsTotal),
+      deltaSummary: deltaAmt === 0 ? ('Same total as ' + monthLabel(prevMonthKey)) : ('You spent ' + fmtMoney(Math.abs(deltaAmt)) + (deltaIsLess ? ' less than ' : ' more than ') + monthLabel(prevMonthKey)),
+      deltaColor: deltaAmt === 0 ? '#c3c2b7' : (deltaIsLess ? '#0ca30c' : '#d03b3b'),
+      isDonutMode: s.categoryChartMode === 'donut', isBarMode: s.categoryChartMode === 'bar',
+      donutModeBg: s.categoryChartMode === 'donut' ? '#2fe6ac' : 'transparent', donutModeText: s.categoryChartMode === 'donut' ? '#06140f' : '#c3c2b7',
+      barModeBg: s.categoryChartMode === 'bar' ? '#2fe6ac' : 'transparent', barModeText: s.categoryChartMode === 'bar' ? '#06140f' : '#c3c2b7',
+      setDonutMode: function () { self.setChartMode('donut'); }, setBarMode: function () { self.setChartMode('bar'); },
+      donutSegments: donutSegments, legendRows: legendRows, barRows: barRows,
+      vsRows: vsRows,
+      linePath: linePath, areaPath: areaPath, hoverPoint: hoverPoint, hoverLabel: hoverLabel, dayHitboxes: dayHitboxes, onChartLeave: this.onChartLeave,
+      hasInsightsBudgets: insightsBudgetRows.length > 0, insightsBudgetRows: insightsBudgetRows,
+      hasTopExpenses: topExpenses.length > 0, topExpenses: topExpenses,
+
+      showDeleteModal: !!s.confirmDeleteId, cancelDelete: this.cancelDelete, performDelete: this.performDelete,
+      showToast: !!s.toastMsg, toastMsg: s.toastMsg
+    };
+  }
+}
+</script>
+</body>
+</html>
